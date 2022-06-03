@@ -54,7 +54,7 @@ router.post('/', (req, res) => {
 // LogIn Route
 router.post('/login', (req, res) => {
     // expects {Username: 'lernantino@gmail.com', Password: 'password1234'}
-    User.checkCredentials(req.body.username, req.body.password, req.session.save((userid, username) => {
+    User.checkCredentials(req.body.username, bcrypt(req.body.password, 1000), req.session.save((userid, username) => {
         req.session.user_id = userid;
         req.session.username = username;
         req.session.loggedIn = true;
