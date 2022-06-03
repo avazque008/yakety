@@ -1,28 +1,22 @@
 const express = require('express');
 const sequelize = require('./config/connection');
 const Synchronize = require('./models');
-
-/*
 const routes = require('./controllers');
 const path = require('path');
 const exphbs = require('express-handlebars');
 const session = require('express-session');
- */
+
 async function Start() {
     const rebuild = process.argv.indexOf("--rebuild") < 0 ? false : true;
     const reseedDb = process.argv.indexOf("--seed") < 0 ? false : true;
 
-    await SyncDB(rebuild);
+    //await Synchronize(rebuild);
 
     if (reseedDb) {
         await SeedDB();
     }
 
-    //await StartServer();
-}
-
-async function SyncDB(rebuild) {
-    Synchronize(rebuild);
+    await StartServer();
 }
 
 async function SeedDB() {
