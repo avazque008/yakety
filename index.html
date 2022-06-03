@@ -20,12 +20,13 @@
     <form id="form" action="">
       <input id="input" autocomplete="off" /><button>Send</button>
     </form>
-    <script src="/socket.io/socket.io.js"></script>
 
+
+    <script src="/socket.io/socket.io.js"></script>
     <script>
       var socket = io();
 
-      var messages = document.getElementById('messages');
+      // var messages = document.getElementById('messages');
       var form = document.getElementById('form');
       var input = document.getElementById('input');
 
@@ -37,12 +38,12 @@
         }
       });
 
-      socket.on('chat message', function(msg) {
-        var item = document.createElement('li');
-        item.textContent = msg;
-        messages.appendChild(item);
-        window.scrollTo(0, document.body.scrollHeight);
-      });
+      // socket.on('chat message', function(msg) {
+      //   var item = document.createElement('li');
+      //   item.textContent = msg;
+      //   messages.appendChild(item);
+      //   window.scrollTo(0, document.body.scrollHeight);
+      // });
     </script>
   </body>
 </html>
