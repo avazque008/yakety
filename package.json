@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "jest"
     },
     "repository": {
         "type": "git",
@@ -17,8 +17,10 @@
     },
     "homepage": "https://github.com/cmullendore/yakety#readme",
     "dependencies": {
+        "dotenv": "^16.0.1",
         "express": "^4.18.1",
+        "jest": "^28.1.0",
         "mysql2": "^2.3.3",
-        "sequelize": "^6.20.1"
+        "sequelize": "^5.22.5"
     }
 }
