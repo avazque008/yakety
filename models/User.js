@@ -8,11 +8,10 @@ class User extends Model {
         return bcrypt.compareSync(loginPw, this.Password);
     }
 
-    static async checkCredentials(username, password) {
+    static async checkCredentials(username) {
         await User.findOne(({
             where: {
                 UsernameNormalized: username.toUpperCase(),
-                password: password
             }
         })).then(dbUserData => {
             if (!dbUserData) {
@@ -20,7 +19,7 @@ class User extends Model {
                 return;
             }
 
-            return (dbUserData.id, dbUserData.Username);
+            return (dbUserData);
         });
     }
 }
