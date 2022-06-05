@@ -1,7 +1,42 @@
 const router = require('express').Router();
 const { User } = require('../../models');
 const { Op } = require('sequelize');
-const bcrypt = require('bcrypt');
+
+// GET all users
+router.get('/', (req, res) => {
+    User.findAll({
+        attributes: { exclude: ['Password'] }
+    })
+        .then(dbUserData => res.json(dbUserData))
+        .catch(err => {
+            console.log(err);
+            res.status(500).json(err);
+        });
+});
+
+// GET user by ID
+router.get('/:id', (req, res) => {
+    User.findOne({
+        attributes: { exclude: ['Password'] },
+        where: {
+            id: req.params.id
+        },
+        include: [
+            // WHAT MODELS ARE CONNECTED AND WHAT ATTRIBUTES DO THEY HAVE!
+        ]
+    })
+        .then(dbUserData => {
+            if (!dbUserData) {
+                res.status(404).json({ message: 'No user found with this id' });
+                return;
+            }
+            res.json(dbUserData);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json(err);
+        });
+});
 
 // SEARCH for users
 router.post('/search', (req, res) => {
@@ -56,7 +91,7 @@ router.post('/login', (req, res) => {
     // expects {Username: 'lernantino@gmail.com', Password: 'password1234'}
     User.checkCredentials(req.body.username)
         .then(dbUserData => {
-            
+
             const validPassword = dbUserData.checkPassword(req.body.password);
 
             if (!validPassword) {
