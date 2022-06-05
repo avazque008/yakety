@@ -33,6 +33,7 @@ class User extends Model {
                 return null;
             }
             if (bcrypt.compare(password, dbUserData.Password)) {
+                dbUserData.password = null;
                 return dbUserData;
             }
 
@@ -69,6 +70,19 @@ class User extends Model {
         });
 
         return chats;
+    }
+
+    async GetUser(id) {
+        const foundUser = await User.findOne({
+            where: {
+                id: id
+            },
+            attributes: {
+                exclude: ["Password"]
+            }
+        });
+
+        return foundUser;
     }
 }
 

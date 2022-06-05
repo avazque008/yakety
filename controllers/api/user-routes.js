@@ -1,8 +1,9 @@
 const router = require('express').Router();
 const { User } = require('../../models');
-const { Op } = require('sequelize');
 
 // GET all users
+/* In our application there should never be a reason
+   to get ALL users. This route isn't necessary.
 router.get('/', (req, res) => {
     User.findAll({
         attributes: { exclude: ['Password'] }
@@ -13,18 +14,11 @@ router.get('/', (req, res) => {
             res.status(500).json(err);
         });
 });
+*/
 
 // GET user by ID
 router.get('/:id', (req, res) => {
-    User.findOne({
-        attributes: { exclude: ['Password'] },
-        where: {
-            id: req.params.id
-        },
-        include: [
-            // WHAT MODELS ARE CONNECTED AND WHAT ATTRIBUTES DO THEY HAVE!
-        ]
-    })
+    User.GetUser(req.params.id)
         .then(dbUserData => {
             if (!dbUserData) {
                 res.status(404).json({ message: 'No user found with this id' });
@@ -40,14 +34,7 @@ router.get('/:id', (req, res) => {
 
 // SEARCH for users
 router.post('/search', (req, res) => {
-    User.findAll({
-        where: {
-            UsernameNormalized: {
-                [Op.like]: req.body.username.toUpperCase()
-            }
-        },
-        order: ["Username"]
-    })
+    User.FindUsers(req.body.username)
         .then(dbUserData => {
             if (!dbUserData) {
                 res.status(404).json({ message: 'No user found with this username' });
@@ -65,19 +52,23 @@ router.post('/search', (req, res) => {
 
 // CREATE a user
 router.post('/', (req, res) => {
-    User.create({
-        Username: req.body.username,
-        UsernameNormalized: req.body.username.toUpperCase(),
-        Password: req.body.password
-    })
+    User.CreateUser(req.body.username, req.body.password)
         .then(dbUserData => {
-            req.session.save(() => {
-                req.session.user_id = dbUserData.id;
-                req.session.username = dbUserData.Username;
-                req.session.loggedIn = true;
+            if (dbUserData.user) {
+                req.session.save(() => {
+                    req.session.user_id = dbUserData.id;
+                    req.session.username = dbUserData.Username;
+                    req.session.loggedIn = true;
 
-                res.json(dbUserData);
-            });
+                    res.json(dbUserData.user);
+                });
+            } else if (dbUserData.err) {
+                // We'll get this if a username is already taken
+                // even though this isn't a true DB error.
+                // The user just needs to pick a new username.
+                res.status(500).json(err);
+            }
+
         })
         .catch(err => {
             console.log(err);
@@ -89,12 +80,10 @@ router.post('/', (req, res) => {
 // LogIn Route
 router.post('/login', (req, res) => {
     // expects {Username: 'lernantino@gmail.com', Password: 'password1234'}
-    User.checkCredentials(req.body.username)
+    User.checkCredentials(req.body.username, req.body.username)
         .then(dbUserData => {
 
-            const validPassword = dbUserData.checkPassword(req.body.password);
-
-            if (!validPassword) {
+            if (!dbUserData) {
                 res.status(400).json({ message: 'No matching combination of that username and password was found.' });
                 return;
             }
@@ -117,8 +106,7 @@ router.post('/logout', (req, res) => {
         req.session.destroy(() => {
             res.status(204).end();
         });
-    }
-    else {
+    } else {
         res.status(404).end();
     }
 });
