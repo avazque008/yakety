@@ -1,5 +1,4 @@
 const { Model, DataTypes } = require('sequelize');
-const bcrypt = require('bcrypt');
 
 const sequelize = require('../config/connection');
 
@@ -8,7 +7,24 @@ class User extends Model {
     checkPassword(loginPw) {
         return bcrypt.compareSync(loginPw, this.Password);
     }
+
+    static async checkCredentials(username, password) {
+        await User.findOne(({
+            where: {
+                UsernameNormalized: username.toUpperCase(),
+                password: password
+            }
+        })).then(dbUserData => {
+            if (!dbUserData) {
+                res.status(400).json({ message: 'No matching combination of that username and password was found.' });
+                return;
+            }
+
+            return (dbUserData.id, dbUserData.Username);
+        });
+    }
 }
+
 
 User.init({
     // define columns
@@ -32,14 +48,13 @@ User.init({
         type: DataTypes.STRING,
         allowNull: false
     }
-},
-{
+}, {
     hooks: {
-      // set up beforeCreate lifecycle "hook" functionality
-      async beforeCreate(newUserData) {
-        newUserData.Password = await bcrypt.hash(newUserData.Password, 10);
-        return newUserData;
-      }
+        // set up beforeCreate lifecycle "hook" functionality
+        async beforeCreate(newUserData) {
+            newUserData.Password = await bcrypt.hash(newUserData.Password, 10);
+            return newUserData;
+        }
     },
     sequelize,
     timestamps: false,
