@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const { Chat } = require('../../models');
 
-router.
 
 
 
