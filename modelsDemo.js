@@ -1,58 +1,74 @@
 const sequelize = require("./config/connection");
 const { Op } = require("sequelize");
 const { User, Chat, Message, Synchronize } = require("./models");
+const { use } = require("bcrypt/promises");
 
-function write(obj) {
+function write(message, obj) {
+    console.log('\x1b[31m%s\x1b[0m', message);
     console.log(JSON.stringify(obj, null, 2));
 }
 
-async function RunDemo() {
-    await Synchronize(true);
+async function RunDemo(forceRecreate) {
+    await Synchronize(forceRecreate);
 
-    // Creating one existing user
-    let upper = "Steve".toUpperCase();
-    await User.create({
-        Username: "Steve",
-        UsernameNormalized: upper,
-        Password: "We should really store hashes, not passwords"
-    });
+    // User 1 registers
+    const userSteve = await User.CreateUser("Steve", "no password")
+        .then(response => {
+            if (response.user) {
+                return response.user;
+            } else {
+                write("Error", response.err);
+                return null;
+            }
+        });
 
-    // User registers
-    upper = "Jane".toUpperCase();
-    let newUser = await User.create({
-        Username: "Jane",
-        UsernameNormalized: upper,
-        Password: "We should really store hashes, not passwords"
-    });
+    // User 2 registers
+    const userJane = await User.CreateUser("Jane", "no password")
+        .then(response => {
+            if (response.user) {
+                return response.user;
+            } else {
+                write("Error", response.err);
+                return null;
+            }
+        });
+
+    // User 3 registers
+    const userMary = await User.CreateUser("Mary", "no password")
+        .then(response => {
+            if (response.user) {
+                return response.user;
+            } else {
+                write("Error", response.err);
+                return null;
+            }
+        });
 
     // User searches for someone to send a message to
-    upper = "Ste".toUpperCase();
-    let userSearch = await User.findAll({
-        where: {
-            UsernameNormalized: {
-                [Op.like]: upper.concat('%')
-            }
-        },
-        order: ["Username"]
-    });
+    let userSearch = await User.FindUsers("Ma");
 
-    write(userSearch)
+    write("User search results", userSearch)
 
     // A user is selected from the search result, so...
     // Create a new chat
-    let newChat = await Chat.create()
-        // Look up the found user
-    let foundUser = await User.findOne({
-        where: {
-            id: userSearch[0].id
-        }
-    });
+    let newChat = await Chat.CreateChat([userSteve.id, userSearch[0].id], "optional chat title");
 
     // Add the current and found users to the chat
     await newChat.setUsers([newUser.id, foundUser.id]);
 
+    newChat = await Chat.findOne({
+        where: {
+            id: newChat.id
+        },
+        include: User
+    });
+
     // Return the new chat
-    write(newChat);
+    write("New chat results", newChat);
+
+    // Get all chats associated with a user
+    const userChats = await newUser.GetChats();
+    write("Get chats for a user result", userChats);
 
     // newUser sends a message to foundUser
     let message1 = await Message.create({
@@ -75,14 +91,20 @@ async function RunDemo() {
 
     // Find all participants in the chat related to the message
     let chat1userIds = await Chat.findByPk(message1.chat_id, {
-            where: {
-                id: message1.chat_id
-            },
-            include: User,
-            attributes: ["id"]
-        })
-        // Send that message to all of those users via socket.io
-    write(chat1userIds);
+        where: {
+            id: message1.chat_id
+        },
+        include: [{
+            model: User,
+            as: "users",
+            attributes: ["id", "Username"],
+            through: {
+                attributes: []
+            }
+        }]
+    });
+    // Send that message to all of those users via socket.io
+    write("Find chat including user IDs", chat1userIds);
 
     // USER LEAVES
 
@@ -101,7 +123,7 @@ async function RunDemo() {
         },
         include: Chat
     });
-    write(loginUser);
+    write("Login Steve including chats", loginUser);
 
     // User selects a chat so find the latest messages by chat ID
     // Note that we don't want to return ALL messages because
@@ -117,9 +139,9 @@ async function RunDemo() {
         limit: 5
     });
 
-    write(messages);
+    write("Get messages for chat", messages);
 
 
 }
 
-RunDemo();
+RunDemo(process.argv.includes("--rebuild"));

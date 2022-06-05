@@ -2,7 +2,17 @@ const { Model, DataTypes } = require('sequelize');
 
 const sequelize = require('../config/connection');
 
-class Chat extends Model {}
+class Chat extends Model {
+    static async CreateChat(userIds, name) {
+        const newChat = await Chat.create({
+            Name: name
+        });
+
+        await newChat.setUsers(userIds);
+
+        return newChat;
+    }
+}
 
 Chat.init({
     id: {

@@ -1,18 +1,33 @@
-const { Model, DataTypes } = require('sequelize');
+const { Model, DataTypes, Op } = require('sequelize');
+const bcrypt = require('bcrypt');
 
 const sequelize = require('../config/connection');
 
 class User extends Model {
-    // set up method to run on instance data (per user) to check password
-    checkPassword(loginPw) {
-        return bcrypt.compareSync(loginPw, this.Password);
+
+    static async CreateUser(username, password) {
+        try {
+            const newUser = await User.create({
+                Username: username,
+                UsernameNormalized: username.toUpperCase(),
+                Password: password
+            });
+
+            return { user: newUser, err: null };
+        } catch (err) {
+            if (err && err.original.code == "ER_DUP_ENTRY") {
+                return { user: null, err: "Username is taken." };
+            }
+            return { user: null, err: err.original.code };
+        }
     }
 
     static async checkCredentials(username, password) {
+        const pwHash = await bcrypt.hash(password, 10)
         await User.findOne(({
             where: {
                 UsernameNormalized: username.toUpperCase(),
-                password: password
+                Password: pwHash
             }
         })).then(dbUserData => {
             if (!dbUserData) {
@@ -22,6 +37,32 @@ class User extends Model {
 
             return (dbUserData.id, dbUserData.Username);
         });
+    }
+
+    static async FindUsers(username) {
+        let userSearch = await User.findAll({
+            where: {
+                UsernameNormalized: {
+                    [Op.like]: username.toUpperCase().concat('%')
+                }
+            },
+            attributes: ["id", "Username"],
+            order: ["Username"],
+            limit: 5
+        });
+
+        return userSearch;
+    }
+
+    async GetChats() {
+        const chats = await this.getChats({
+            include: [{
+                model: User,
+                attributes: ["id", "Username"]
+            }]
+        });
+
+        return chats;
     }
 }
 
@@ -52,8 +93,13 @@ User.init({
     hooks: {
         // set up beforeCreate lifecycle "hook" functionality
         async beforeCreate(newUserData) {
-            newUserData.Password = await bcrypt.hash(newUserData.Password, 10);
+            newUserData.password = await bcrypt.hash(newUserData.Password, 10);
             return newUserData;
+        },
+
+        async beforeUpdate(updatedUserData) {
+            updatedUserData.password = await bcrypt.hash(updatedUserData.Password, 10);
+            return updatedUserData;
         }
     },
     sequelize,
