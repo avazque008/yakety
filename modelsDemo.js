@@ -51,62 +51,48 @@ async function RunDemo(forceRecreate) {
 
     // A user is selected from the search result, so...
     // Create a new chat
-    let newChat = await Chat.CreateChat([userSteve.id, userSearch[0].id], "optional chat title");
+    const newChat = await Chat.CreateChat([userSteve.id, userSearch[0].id], "optional chat title");
 
-    // Add the current and found users to the chat
-    await newChat.setUsers([newUser.id, foundUser.id]);
+    write("New chat", newChat);
 
-    newChat = await Chat.findOne({
-        where: {
-            id: newChat.id
-        },
-        include: User
-    });
+    const foundChat = await Chat.GetChat(newChat.id);
+
+    write("Found (new) chat", foundChat);
 
     // Return the new chat
-    write("New chat results", newChat);
+    write("New chat results", foundChat);
 
     // Get all chats associated with a user
-    const userChats = await newUser.GetChats();
-    write("Get chats for a user result", userChats);
+    const steveChats = await userSteve.GetChats();
+    write("Get chats for steve result", steveChats);
+
+    // Get all chats associated with a user
+    const janeChats = await userJane.GetChats();
+    write("Get chats for Jane result", janeChats);
+
+    // Get all chats associated with a user
+    const maryChats = await userMary.GetChats();
+    write("Get chats for mary result", maryChats);
 
     // newUser sends a message to foundUser
-    let message1 = await Message.create({
-        user_id: newUser.id,
-        chat_id: newChat.id,
-        Text: "Message 1"
-    });
+    await steveChats[0].AddMessage(userSteve.id, "Message 1");
+    write("Steve message added", null);
 
     // They send several additional messages back and forth
+    // this uses the DB model rather than the addmessage for speed
+    // and is not intended to be used by consumers of the model.
+    write("Adding several messages", null);
     await Message.bulkCreate([
-        { user_id: foundUser.id, chat_id: newChat.id, Text: "Message 2" },
-        { user_id: newUser.id, chat_id: newChat.id, Text: "Message 3" },
-        { user_id: foundUser.id, chat_id: newChat.id, Text: "Message 4" },
-        { user_id: newUser.id, chat_id: newChat.id, Text: "Message 5" },
-        { user_id: foundUser.id, chat_id: newChat.id, Text: "Message 6" },
-        { user_id: newUser.id, chat_id: newChat.id, Text: "Message 7" },
-        { user_id: foundUser.id, chat_id: newChat.id, Text: "Message 8" },
-        { user_id: newUser.id, chat_id: newChat.id, Text: "Message 9" }
+        { user_id: userSearch[0].id, chat_id: foundChat.id, Text: "Message 2" },
+        { user_id: userSteve.id, chat_id: foundChat.id, Text: "Message 3" },
+        { user_id: userSearch[0].id, chat_id: foundChat.id, Text: "Message 4" },
+        { user_id: userSteve.id, chat_id: foundChat.id, Text: "Message 5" },
+        { user_id: userSearch[0].id, chat_id: foundChat.id, Text: "Message 6" },
+        { user_id: userSteve.id, chat_id: foundChat.id, Text: "Message 7" },
+        { user_id: userSearch[0].id, chat_id: foundChat.id, Text: "Message 8" },
+        { user_id: userSteve.id, chat_id: foundChat.id, Text: "Message 9" }
     ]);
 
-    // Find all participants in the chat related to the message
-    let chat1userIds = await Chat.findByPk(message1.chat_id, {
-        where: {
-            id: message1.chat_id
-        },
-        include: [{
-            model: User,
-            as: "users",
-            attributes: ["id", "Username"],
-            through: {
-                attributes: []
-            }
-        }]
-    });
-    // Send that message to all of those users via socket.io
-    write("Find chat including user IDs", chat1userIds);
-
-    // USER LEAVES
 
     // USER LOGIN
 
@@ -115,31 +101,24 @@ async function RunDemo(forceRecreate) {
     // If they're right, one result with all of the user's chats
     // will be returned (saves a database call)
     // Be sure to normalize and use the normalized field
-    upper = "Steve".toUpperCase();
-    let loginUser = await User.findOne({
-        where: {
-            Username: upper,
-            Password: "We should really store hashes, not passwords"
-        },
-        include: Chat
-    });
-    write("Login Steve including chats", loginUser);
+    const newUserSteve = await User.CheckCredentials("Steve", "no password");
+    const newUserMary = await User.CheckCredentials("Mary", "no password");
+
+    write("Login Steve including chats", newUserSteve);
+    write("Login Mary including chats", newUserMary);
+
+    const newSteveChats = await newUserSteve.GetChats();
+    const newMaryChats = await newUserMary.GetChats();
+    write("Steve chats", newSteveChats);
+    write("Mary chats", newMaryChats);
 
     // User selects a chat so find the latest messages by chat ID
     // Note that we don't want to return ALL messages because
     // there could be millions, so note the page and offset settings
-    let messages = await Message.findAll({
-        where: {
-            chat_id: 1
-        },
-        order: [
-            ['SentOn', "DESC"]
-        ],
-        offset: 3,
-        limit: 5
-    });
+    let steveMessages = await newSteveChats[0].GetMessages(2, 3);
 
-    write("Get messages for chat", messages);
+
+    write("Get messages for steve", steveMessages);
 
 
 }

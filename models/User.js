@@ -6,11 +6,12 @@ const sequelize = require('../config/connection');
 class User extends Model {
 
     static async CreateUser(username, password) {
+        var pwdHash = await bcrypt.hash(password, 10);
         try {
             const newUser = await User.create({
                 Username: username,
                 UsernameNormalized: username.toUpperCase(),
-                Password: password
+                Password: pwdHash
             });
 
             return { user: newUser, err: null };
@@ -22,21 +23,23 @@ class User extends Model {
         }
     }
 
-    static async checkCredentials(username, password) {
-        const pwHash = await bcrypt.hash(password, 10)
-        await User.findOne(({
+    static async CheckCredentials(username, password) {
+        const authResult = await User.findOne(({
             where: {
-                UsernameNormalized: username.toUpperCase(),
-                Password: pwHash
+                UsernameNormalized: username.toUpperCase()
             }
         })).then(dbUserData => {
             if (!dbUserData) {
-                res.status(400).json({ message: 'No matching combination of that username and password was found.' });
-                return;
+                return null;
+            }
+            if (bcrypt.compare(password, dbUserData.Password)) {
+                return dbUserData;
             }
 
-            return (dbUserData.id, dbUserData.Username);
+            return null;
         });
+
+        return authResult;
     }
 
     static async FindUsers(username) {
@@ -58,7 +61,10 @@ class User extends Model {
         const chats = await this.getChats({
             include: [{
                 model: User,
-                attributes: ["id", "Username"]
+                attributes: ["id", "Username"],
+                through: {
+                    attributes: []
+                }
             }]
         });
 
@@ -90,18 +96,6 @@ User.init({
         allowNull: false
     }
 }, {
-    hooks: {
-        // set up beforeCreate lifecycle "hook" functionality
-        async beforeCreate(newUserData) {
-            newUserData.password = await bcrypt.hash(newUserData.Password, 10);
-            return newUserData;
-        },
-
-        async beforeUpdate(updatedUserData) {
-            updatedUserData.password = await bcrypt.hash(updatedUserData.Password, 10);
-            return updatedUserData;
-        }
-    },
     sequelize,
     timestamps: false,
     freezeTableName: true,

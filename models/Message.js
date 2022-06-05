@@ -10,7 +10,8 @@ Message.init({
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        primaryKey: true
+        primaryKey: true,
+        defaultValue: DataTypes.UUIDV4
     },
     user_id: {
         type: DataTypes.INTEGER,
@@ -26,20 +27,9 @@ Message.init({
     SentOn: {
         type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: sequelize.literal("NOW()")
+        defaultValue: DataTypes.NOW
     }
 }, {
-    hooks: {
-        afterCreate: (message, options) => {
-            Chat.update({
-                LastUsedOn: sequelize.literal("NOW()")
-            }, {
-                where: {
-                    id: message.chat_id
-                }
-            })
-        }
-    },
     sequelize,
     timestamps: false,
     freezeTableName: true,
