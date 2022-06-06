@@ -3,9 +3,9 @@ const { Chat, User } = require('../../models');
 
 // GET A Chat by ID
 // NEED CLARIFICATION ON WHAT IS NEEDED TO BE PAST ON TO DB
-router.get('/', (req, res) => {
+router.get('/:id', async (req, res) => {
 
-    let user = User.GetUser(req.session.user_id);
+    let user = await User.GetUser(req.session.user_id || req.params.id);
 
     user.GetChats().then(dbChatData => {
         if (!dbChatData) {
@@ -18,12 +18,12 @@ router.get('/', (req, res) => {
             console.log(err);
             res.status(500).json(err);
         });
-})
+});
 
 
 //  CREATE New Chat
-router.post('/', (req, res) => {
-    Chat.CreateChat([req.session.user_id, req.body.user_id], req.body.name)
+router.post('/', async (req, res) => {
+    await Chat.CreateChat([req.session.user_id || req.body.session_id, req.body.user_id], req.body.name)
         .then(dbChatData => res.json(dbChatData))
         .catch(err => {
             console.log(err);
@@ -32,10 +32,10 @@ router.post('/', (req, res) => {
 });
 
 // ADD Send Message to a Chat
-router.post('/:id', (req, res) => {
-    let chat = Chat.GetChat(req.params.id);
+router.post('/:id', async (req, res) => {
+    let chat = await Chat.GetChat(req.params.id);
 
-    chat.AddMessage(req.session.user_id, req.body.message)
+    chat.AddMessage(req.session.user_id || req.body.session_id, req.body.message)
         .then(dbChatData => res.json(dbChatData))
         .catch(err => {
             console.log(err);
@@ -44,11 +44,11 @@ router.post('/:id', (req, res) => {
 });
 
 // Get Existing Chat
-router.get('/:id', (req, res) => {
-    let chat = Chat.GetChat(req.params.id);
+router.get('/:id', async (req, res) => {
+    let chat = await Chat.GetChat(req.params.id);
 
     // DEFINE SKIP AND TAKE!!
-    chat.GetMessages(skip, take)
+    chat.GetMessages(0, 100)
         .then(dbChatData => res.json(dbChatData))
         .catch(err => {
             console.log(err);
@@ -56,17 +56,17 @@ router.get('/:id', (req, res) => {
         });
 });
 
-// GET Previuos Chat Messages
-router.get('/:chat/skip/:skip/take/:take', (req, res) => {
-    let chat = Chat.GetChat(req.params.chat);
+// // GET Previuos Chat Messages
+// router.get('/:chat/skip/:skip/take/:take', (req, res) => {
+//     let chat = Chat.GetChat(req.params.chat);
 
-    chat.GetMessages(req.params.skip, req.params.take)
-        .then(dbChatData => res.json(dbChatData))
-        .catch(err => {
-            console.log(err);
-            res.status(500).json(err);
-        });
+//     chat.GetMessages(0, 100)
+//         .then(dbChatData => res.json(dbChatData))
+//         .catch(err => {
+//             console.log(err);
+//             res.status(500).json(err);
+//         });
 
-});
+// });
 
 module.exports = router;

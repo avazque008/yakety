@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { User } = require('../../models');
 
 // GET user by ID
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
     User.GetUser(req.params.id)
         .then(dbUserData => {
             if (!dbUserData) {
@@ -65,7 +65,7 @@ router.post('/', (req, res) => {
 // LogIn Route
 router.post('/login', (req, res) => {
     // expects {Username: 'lernantino@gmail.com', Password: 'password1234'}
-    User.checkCredentials(req.body.username, req.body.password)
+    User.CheckCredentials(req.body.username, req.body.password)
         .then(dbUserData => {
 
             if (!dbUserData) {
@@ -78,7 +78,7 @@ router.post('/login', (req, res) => {
                 req.session.username = dbUserData.Username;
                 req.session.loggedIn = true;
 
-                res.json({ user: dbUserData, message: 'You are now logged in!' });
+                res.json({ message: 'You are now logged in!' });
             });
 
         })

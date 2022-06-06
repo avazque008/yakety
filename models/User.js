@@ -61,7 +61,7 @@ class User extends Model {
         return userSearch;
     }
 
-    static async GetChats() {
+    async GetChats() {
         const chats = await this.getChats({
             include: [{
                 model: User,
