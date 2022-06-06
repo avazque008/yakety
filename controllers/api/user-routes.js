@@ -1,21 +1,6 @@
 const router = require('express').Router();
 const { User } = require('../../models');
 
-// GET all users
-/* In our application there should never be a reason
-   to get ALL users. This route isn't necessary.
-router.get('/', (req, res) => {
-    User.findAll({
-        attributes: { exclude: ['Password'] }
-    })
-        .then(dbUserData => res.json(dbUserData))
-        .catch(err => {
-            console.log(err);
-            res.status(500).json(err);
-        });
-});
-*/
-
 // GET user by ID
 router.get('/:id', (req, res) => {
     User.GetUser(req.params.id)

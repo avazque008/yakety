@@ -58,7 +58,7 @@ class User extends Model {
         return userSearch;
     }
 
-    async GetChats() {
+    static async GetChats() {
         const chats = await this.getChats({
             include: [{
                 model: User,
@@ -72,7 +72,7 @@ class User extends Model {
         return chats;
     }
 
-    async GetUser(id) {
+    static async GetUser(id) {
         const foundUser = await User.findOne({
             where: {
                 id: id
