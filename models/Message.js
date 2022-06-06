@@ -8,7 +8,6 @@ class Message extends Model {}
 Message.init({
     id: {
         type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4
