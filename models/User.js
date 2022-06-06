@@ -14,6 +14,8 @@ class User extends Model {
                 Password: pwdHash
             });
 
+            newUser.Password = null;
+
             return { user: newUser, err: null };
         } catch (err) {
             if (err && err.original.code == "ER_DUP_ENTRY") {
@@ -72,7 +74,7 @@ class User extends Model {
         return chats;
     }
 
-    async GetUser(id) {
+    static async GetUser(id) {
         const foundUser = await User.findOne({
             where: {
                 id: id
