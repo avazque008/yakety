@@ -30,11 +30,12 @@ class User extends Model {
             where: {
                 UsernameNormalized: username.toUpperCase()
             }
-        })).then(dbUserData => {
+        })).then(async(dbUserData) => {
             if (!dbUserData) {
                 return null;
             }
-            if (bcrypt.compare(password, dbUserData.Password)) {
+            const matches = await bcrypt.compare(password, dbUserData.Password)
+            if (matches) {
                 dbUserData.password = null;
                 return dbUserData;
             }
