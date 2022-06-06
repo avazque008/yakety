@@ -50,14 +50,14 @@ router.post('/search', (req, res) => {
 
 
 
-// CREATE a user
+// CREATE/REGISTER a user
 router.post('/', (req, res) => {
     User.CreateUser(req.body.username, req.body.password)
         .then(dbUserData => {
             if (dbUserData.user) {
                 req.session.save(() => {
-                    req.session.user_id = dbUserData.id;
-                    req.session.username = dbUserData.Username;
+                    req.session.user_id = dbUserData.user.id;
+                    req.session.username = dbUserData.user.Username;
                     req.session.loggedIn = true;
 
                     res.json(dbUserData.user);
@@ -80,7 +80,7 @@ router.post('/', (req, res) => {
 // LogIn Route
 router.post('/login', (req, res) => {
     // expects {Username: 'lernantino@gmail.com', Password: 'password1234'}
-    User.checkCredentials(req.body.username, req.body.username)
+    User.checkCredentials(req.body.username, req.body.password)
         .then(dbUserData => {
 
             if (!dbUserData) {
@@ -100,7 +100,7 @@ router.post('/login', (req, res) => {
 
 });
 
-
+// LogOut Route
 router.post('/logout', (req, res) => {
     if (req.session.loggedIn) {
         req.session.destroy(() => {
