@@ -1,26 +1,88 @@
-const { Model, DataTypes } = require('sequelize');
+const { Model, DataTypes, Op } = require('sequelize');
+const bcrypt = require('bcrypt');
 
 const sequelize = require('../config/connection');
 
 class User extends Model {
-    // set up method to run on instance data (per user) to check password
-    checkPassword(loginPw) {
-        return bcrypt.compareSync(loginPw, this.Password);
+
+    static async CreateUser(username, password) {
+        var pwdHash = await bcrypt.hash(password, 10);
+        try {
+            const newUser = await User.create({
+                Username: username,
+                UsernameNormalized: username.toUpperCase(),
+                Password: pwdHash
+            });
+
+            return { user: newUser, err: null };
+        } catch (err) {
+            if (err && err.original.code == "ER_DUP_ENTRY") {
+                return { user: null, err: "Username is taken." };
+            }
+            return { user: null, err: err.original.code };
+        }
     }
 
-    static async checkCredentials(username) {
-        await User.findOne(({
+    static async CheckCredentials(username, password) {
+        const authResult = await User.findOne(({
             where: {
-                UsernameNormalized: username.toUpperCase(),
+                UsernameNormalized: username.toUpperCase()
             }
         })).then(dbUserData => {
             if (!dbUserData) {
-                res.status(400).json({ message: 'No matching combination of that username and password was found.' });
-                return;
+                return null;
+            }
+            if (bcrypt.compare(password, dbUserData.Password)) {
+                dbUserData.password = null;
+                return dbUserData;
             }
 
-            return (dbUserData);
+            return null;
         });
+
+        return authResult;
+    }
+
+    static async FindUsers(username) {
+        let userSearch = await User.findAll({
+            where: {
+                UsernameNormalized: {
+                    [Op.like]: username.toUpperCase().concat('%')
+                }
+            },
+            attributes: ["id", "Username"],
+            order: ["Username"],
+            limit: 5
+        });
+
+        return userSearch;
+    }
+
+    async GetChats() {
+        const chats = await this.getChats({
+            include: [{
+                model: User,
+                attributes: ["id", "Username"],
+                through: {
+                    attributes: []
+                }
+            }]
+        });
+
+        return chats;
+    }
+
+    async GetUser(id) {
+        const foundUser = await User.findOne({
+            where: {
+                id: id
+            },
+            attributes: {
+                exclude: ["Password"]
+            }
+        });
+
+        return foundUser;
     }
 }
 
@@ -48,13 +110,6 @@ User.init({
         allowNull: false
     }
 }, {
-    hooks: {
-        // set up beforeCreate lifecycle "hook" functionality
-        async beforeCreate(newUserData) {
-            newUserData.Password = await bcrypt.hash(newUserData.Password, 10);
-            return newUserData;
-        }
-    },
     sequelize,
     timestamps: false,
     freezeTableName: true,
