@@ -1,0 +1,45 @@
+.forms {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #005FB8;
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+    border-radius: 10px;
+}
+
+.forms h3 {
+    text-decoration: underline;
+}
+
+.forms div {
+    padding: 10px;
+}
+
+
+.logout-btn,
+.login-btn,
+.signup-btn {
+    padding: 15px 12px;
+    width: 50%;
+    border-radius: 30px;
+    font-size: 24px;
+    color: white;
+    background-color: #47A6FF;
+    border: none;
+}
+
+.login-btn,
+.signup-btn {
+    padding: 5px 0;
+    width: 20%;
+}
+
+.appear-signup-btn {
+    padding: 10px 35px;
+    border-radius: 15px;
+    font-size: 18px;
+    color: white;
+    background-color: #005FB8;
+    border: none;
+}
