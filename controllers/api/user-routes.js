@@ -80,9 +80,7 @@ router.post('/login', (req, res) => {
 
                 res.json({ message: 'You are now logged in!' });
             });
-
         })
-
 });
 
 // LogOut Route

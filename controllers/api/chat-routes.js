@@ -2,10 +2,9 @@ const router = require('express').Router();
 const { Chat, User } = require('../../models');
 
 // GET A Chat by ID
-// NEED CLARIFICATION ON WHAT IS NEEDED TO BE PAST ON TO DB
-router.get('/:id', async (req, res) => {
+router.get('/', async (req, res) => {
 
-    let user = await User.GetUser(req.session.user_id || req.params.id);
+    let user = await User.GetUser(req.session.user_id);
 
     user.GetChats().then(dbChatData => {
         if (!dbChatData) {
@@ -22,8 +21,9 @@ router.get('/:id', async (req, res) => {
 
 
 //  CREATE New Chat
+// /api/chats/
 router.post('/', async (req, res) => {
-    await Chat.CreateChat([req.session.user_id || req.body.session_id, req.body.user_id], req.body.name)
+    await Chat.CreateChat([req.session.user_id, req.body.other_user_id], req.body.name)
         .then(dbChatData => res.json(dbChatData))
         .catch(err => {
             console.log(err);
@@ -35,7 +35,7 @@ router.post('/', async (req, res) => {
 router.post('/:id', async (req, res) => {
     let chat = await Chat.GetChat(req.params.id);
 
-    chat.AddMessage(req.session.user_id || req.body.session_id, req.body.message)
+    chat.AddMessage(req.session.user_id, req.body.message)
         .then(dbChatData => res.json(dbChatData))
         .catch(err => {
             console.log(err);
