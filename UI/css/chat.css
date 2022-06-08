@@ -11,12 +11,12 @@ body {
   align-items: center;
   min-height: 100vh;
   background: linear-gradient(
-    #009688 0%,
-    #009688 130px,
+    #89BBFE 0%,
+    #89bbfe 130px,
     #d9dbd5 130px,
     #d9dbd5 100%
   );
-}
+} 
 
 .container {
   position: relative;
@@ -353,7 +353,7 @@ body {
 }
 
 .button {
-    background-color:#06d755;
+    background-color:#89bbfe;
     color:#d9dbd5;
     font-size: 20px;
     border:none;
@@ -364,5 +364,5 @@ body {
 }
 
 .button:hover {
-    background-color: #dcf8c6;
+    background-color: #acedff;
 }
