@@ -2,7 +2,11 @@ const router = require('express').Router();
 
 // render LogIn page
 router.get('/', (req, res) => {
-    res.render('home-page');
+    const userName = req.session.username;
+    res.render('home-page', {
+        loggedIn: true,
+        username: userName
+    });
 });
 
 module.exports = router;

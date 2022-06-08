@@ -16,13 +16,20 @@
         <div class="header">
             <div class="container">
                 <nav class="row nav justify-content-evenly">
-                    <div class="col-12 col-md-4 text-center">
-                        <button id="logout" class="logout-btn">Log Out</button>
+                    <div class="col-2 col-md-4 text-center">
+                        {{#if username}}
+                            Welcome, {{username}}
+                        {{/if}}
+                    </div>
+                    <div class="col col-md-4 text-center">
+                        <h1 class="text-center">Yakety</h1>
+                    </div>
+                    <div class="col-2 col-md-4 text-center">
+                        {{#if loggedIn}}
+                            <button id="logout" class="logout-btn">Log Out</button>
+                        {{/if}}
                     </div>
                 </nav>
-            </div>
-            <div class="title">
-                <h1 class="text-center">Yakety</h1>
             </div>
         </div>
         <main>
