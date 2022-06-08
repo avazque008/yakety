@@ -1,20 +1,18 @@
 {
     "name": "yakety",
-    "version": "0.0.1",
-    "description": "socket.io app",
-    "dependencies": {
-        "express": "^4.18.1",
-        "socket.io": "^4.5.1"
     "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
+    "description": "socket.io app",
+    "main": "server.js",
     "scripts": {
-        "test": "jest"
+        "start": "node server.js",
+        "test": "jest",
+        "seed": "node ./seeds"
     },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/cmullendore/yakety.git"
     },
+    "keywords": [],
     "author": "",
     "license": "ISC",
     "bugs": {
@@ -23,10 +21,15 @@
     "homepage": "https://github.com/cmullendore/yakety#readme",
     "dependencies": {
         "bcrypt": "^5.0.1",
+        "connect-session-sequelize": "^7.1.3",
         "dotenv": "^16.0.1",
         "express": "^4.18.1",
-        "jest": "^28.1.0",
+        "express-handlebars": "^6.0.6",
+        "express-session": "^1.17.3",
         "mysql2": "^2.3.3",
-        "sequelize": "^5.22.5"
+        "sequelize": "^6.19.0"
+    },
+    "devDependencies": {
+        "jest": "^28.1.0"
     }
-}}
+}

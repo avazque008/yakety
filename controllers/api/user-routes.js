@@ -1,23 +1,8 @@
 const router = require('express').Router();
 const { User } = require('../../models');
 
-// GET all users
-/* In our application there should never be a reason
-   to get ALL users. This route isn't necessary.
-router.get('/', (req, res) => {
-    User.findAll({
-        attributes: { exclude: ['Password'] }
-    })
-        .then(dbUserData => res.json(dbUserData))
-        .catch(err => {
-            console.log(err);
-            res.status(500).json(err);
-        });
-});
-*/
-
 // GET user by ID
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
     User.GetUser(req.params.id)
         .then(dbUserData => {
             if (!dbUserData) {
@@ -50,14 +35,14 @@ router.post('/search', (req, res) => {
 
 
 
-// CREATE a user
+// CREATE/REGISTER a user
 router.post('/', (req, res) => {
     User.CreateUser(req.body.username, req.body.password)
         .then(dbUserData => {
             if (dbUserData.user) {
                 req.session.save(() => {
-                    req.session.user_id = dbUserData.id;
-                    req.session.username = dbUserData.Username;
+                    req.session.user_id = dbUserData.user.id;
+                    req.session.username = dbUserData.user.Username;
                     req.session.loggedIn = true;
 
                     res.json(dbUserData.user);
@@ -80,7 +65,7 @@ router.post('/', (req, res) => {
 // LogIn Route
 router.post('/login', (req, res) => {
     // expects {Username: 'lernantino@gmail.com', Password: 'password1234'}
-    User.checkCredentials(req.body.username, req.body.username)
+    User.CheckCredentials(req.body.username, req.body.password)
         .then(dbUserData => {
 
             if (!dbUserData) {
@@ -93,14 +78,12 @@ router.post('/login', (req, res) => {
                 req.session.username = dbUserData.Username;
                 req.session.loggedIn = true;
 
-                res.json({ user: dbUserData, message: 'You are now logged in!' });
+                res.json({ message: 'You are now logged in!' });
             });
-
         })
-
 });
 
-
+// LogOut Route
 router.post('/logout', (req, res) => {
     if (req.session.loggedIn) {
         req.session.destroy(() => {
