@@ -39,10 +39,11 @@ router.post('/search', (req, res) => {
 router.post('/', (req, res) => {
     User.CreateUser(req.body.username, req.body.password)
         .then(dbUserData => {
+            console.log(dbUserData)
             if (dbUserData.user) {
                 req.session.save(() => {
-                    req.session.user_id = dbUserData.user.id;
-                    req.session.username = dbUserData.user.Username;
+                    req.session.user_id = dbUserData.user.get().id;
+                    req.session.username = dbUserData.user.get().Username;
                     req.session.loggedIn = true;
 
                     res.json(dbUserData.user);
@@ -51,7 +52,7 @@ router.post('/', (req, res) => {
                 // We'll get this if a username is already taken
                 // even though this isn't a true DB error.
                 // The user just needs to pick a new username.
-                res.status(500).json(err);
+                res.status(500).json(dbUserData.err);
             }
 
         })
