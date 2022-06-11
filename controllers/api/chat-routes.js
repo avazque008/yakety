@@ -1,19 +1,20 @@
 const router = require('express').Router();
 const { response } = require('express');
 const { Chat, User } = require('../../models');
+const verifyChat = require('../../utils/verify-chat');
 
 // GET A Chat by ID
-router.get('/', async(req, res) => {
+router.get('/', async (req, res) => {
 
     let user = await User.GetUser(req.session.user_id);
 
     user.GetChats().then(dbChatData => {
-            if (!dbChatData) {
-                res.status(404).json({ message: 'No chat found with this id' });
-                return;
-            }
-            res.json(dbChatData);
-        })
+        if (!dbChatData) {
+            res.status(404).json({ message: 'No chat found with this id' });
+            return;
+        }
+        res.json(dbChatData);
+    })
         .catch(err => {
             console.log(err);
             res.status(500).json(err);
@@ -23,7 +24,7 @@ router.get('/', async(req, res) => {
 
 //  CREATE New Chat
 // /api/chats/
-router.post('/', async(req, res) => {
+router.post('/', verifyChat, async (req, res) => {
     let newChat = await Chat.CreateChat([req.session.user_id, req.body.other_user_id], req.body.name)
         .catch(err => {
             console.log(err);
@@ -40,7 +41,7 @@ router.post('/', async(req, res) => {
 });
 
 // ADD Send Message to a Chat
-router.post('/:id', async(req, res) => {
+router.post('/:id', async (req, res) => {
     let chat = await Chat.GetChat(req.params.id);
 
     await chat.AddMessage(req.session.user_id, req.body.message)
@@ -52,7 +53,7 @@ router.post('/:id', async(req, res) => {
 });
 
 // Get Existing Chat
-router.get('/:id', async(req, res) => {
+router.get('/:id', async (req, res) => {
     let chat = await Chat.GetChat(req.params.id);
 
     // DEFINE SKIP AND TAKE!!
