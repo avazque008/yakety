@@ -1,50 +1,54 @@
-<body>
-  <div class="chat">
-    <div id="sidebar" class="chat__sidebar">
-
+<!-- Modal -->
+<div class="modal" id="newMessageModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="newChatModalTitle">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <textarea class="form-control" id="newMessageText" rows="3" placeholder="What would you like to say?"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-close" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="sendNewChat">Send</button>
+      </div>
     </div>
-    <div class="chat__main">
-      <div id="messages" class="chat__messages"></div>
+  </div>
+</div>
 
-      <div class="compose">
-        <form id="message-form">
-          <input id="message" placeholder="send a message" required autocomplete="off">
-          <button>Send</button>
-        </form>
-        </div>
+<div class="container row">
+  <div id="left" class="col-4">
+    <div class="left m-3">
+      <input id="findUser" class="form-control" placeholder="Find a user" autocomplete="off">
+      <ul id="foundUsers">
+
+      </ul>
+    </div>
+    <div class="">
+      <ul id="chatsList">
+
+      </ul>
+    </div>
+
+  </div>
+  <div class="col">
+    <div class="row">
+      <div class="col m-3">
+      <textarea class="form-control" id="messageContent" rows="3" placeholder="What would you like to say?"></textarea>
+      </div>
+      <div class="col-1" m-3>
+      <button id="sendMessage" class="btn btn-primary mb-3">Send</button>
+      </div>
+    </div>
+    <div id="messages">
 
     </div>
   </div>
-  <script id="message-template" type="text/html">
-    <div class="message">
-      <p>
-        <span class="message__name">{{username}}</span>
-        <span class="message__meta">{{createdAt}}</span>
-      </p>
-      <p>{{message}}</p>
-    </div>
-  </script>
 
-  <script id="location-message-template" type="text/html">
-    <div>
-      <p>
-        <span class="message__name">{{username}}</span>
-        <span class="message__meta">{{createdAt}}</span>
-      </p>
-      </div>
-  </script>
-  
-  <script id="sidebar-template" type="text/html">
-    <div>
-      <h3 class="list-title">Users</h3>
-      <ul class="users">
-        {{#users}}
-        <li> {{username}} </li>
-        {{/users}}
-      </ul>
-    </div>
-  </script>
-
-</body>
-
-</html>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/javascript/chat.js"></script>
+  <script src="/javascript/logout.js"></script>
+</div>
