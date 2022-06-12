@@ -15,9 +15,10 @@ async function loginFormHandler(event) {
         });
 
         if (response.ok) {
-            // Testing
-            alert('You are now logged in!');
-            // 
+            response.json()
+                .then(data => {
+                    console.log(data);
+                })
             document.location.replace('/home');
 
         } else if (response.statusText === 'Bad Request') {

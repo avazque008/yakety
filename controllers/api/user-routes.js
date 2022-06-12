@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { User } = require('../../models');
 
 // GET user by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', async(req, res) => {
     User.GetUser(req.params.id)
         .then(dbUserData => {
             if (!dbUserData) {
@@ -18,8 +18,8 @@ router.get('/:id', async (req, res) => {
 });
 
 // SEARCH for users
-router.post('/search', (req, res) => {
-    User.FindUsers(req.body.username)
+router.get('/', (req, res) => {
+    User.FindUsers(req.query.search)
         .then(dbUserData => {
             if (!dbUserData) {
                 res.status(404).json({ message: 'No user found with this username' });
@@ -62,6 +62,21 @@ router.post('/', (req, res) => {
 });
 
 
+// Attach Socket session with http session
+router.put('/:id', (req, res) => {
+    // ...with a little security to prevent session hijacks
+    if (req.session == null || req.session.user_id != req.params.id) {
+        res.status(404).send();
+    }
+
+    if (req.body.stream_session_id) {
+        var socket = req.app.get("socketio").engine.clients[req.body.stream_session_id];
+        socket.userID = req.session.user_id;
+        console.log(req.app.get("socketio").engine.clients);
+    }
+
+});
+
 // LogIn Route
 router.post('/login', (req, res) => {
     // expects {Username: 'lernantino@gmail.com', Password: 'password1234'}
@@ -77,7 +92,6 @@ router.post('/login', (req, res) => {
                 req.session.user_id = dbUserData.id;
                 req.session.username = dbUserData.Username;
                 req.session.loggedIn = true;
-
                 res.json({ message: 'You are now logged in!' });
             });
         })

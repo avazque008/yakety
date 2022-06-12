@@ -70,12 +70,12 @@ Chat.init({
     CreatedOn: {
         type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: sequelize.literal("NOW()")
+        defaultValue: DataTypes.NOW
     },
     LastUsedOn: {
         type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: sequelize.literal("NOW()")
+        defaultValue: DataTypes.NOW
     },
 
 }, {
