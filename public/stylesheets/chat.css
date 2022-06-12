@@ -163,3 +163,7 @@ button:disabled {
     padding:12px 24px 0
 }
 
+.chrisuser {
+    font-weight: bolder;
+    color: red;
+}

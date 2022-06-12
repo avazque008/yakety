@@ -155,7 +155,7 @@ async function loadChat(chat) {
 
     chat.users.forEach(user => {
         if (user.id != user_id) {
-            headerHtml = headerHtml.concat(`<p>${user.Username}</p>`);
+            headerHtml = headerHtml.concat(`<p class="chrisuser">${user.Username}</p>`);
         }
     });
 
