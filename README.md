@@ -25,7 +25,7 @@ Yakety is a full-stack web application that allows users to create chat rooms wi
  
 ## Usage
 
- As an web application Yakety must be used through a web browser and visiting [Applicatio URL Goes Here!] .
+ As an web application Yakety must be used through a web browser and visiting [Application URL Goes Here!] .
 
 ## License
 
@@ -52,4 +52,5 @@ If you require any further information / assistance, please feel free to contact
 
 ## Web Application Deployemnt URL
 
-// Need To Be Deploy //
+// Needs To Be Deploy //
+
