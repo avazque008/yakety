@@ -26,7 +26,7 @@
 
     </div>
     
-    <div class="chatInput">
+    <div class="chat_input">
 
       <textarea class="form-control" id="messageContent" rows="2" placeholder="What would you like to say?"></textarea>
       <button id="sendMessage" class="button">Send</button>
@@ -34,8 +34,11 @@
     </div>
   </div>
 </div>
-      
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
   <script src="/javascript/chat.js"></script>
+  {{!-- <script src="/javascript/logout.js"></script> --}}
 </body>
 
 </html>
