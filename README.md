@@ -3,7 +3,7 @@
 
 ## Description
 
-Yakety is a full-stack web application that allows users to create chat rooms with other register users, while first loggin or signing up to Yakety to chat other users. 
+Yakety is a full-stack web application that allows users to create chat rooms with other register users, while first loggin or signing up to Yakety. 
 
 #### Built With
 * HTML
