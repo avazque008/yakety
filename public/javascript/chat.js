@@ -2,7 +2,7 @@ $("#chatsList").on("click", "li", event => {
     let chatLi = $(event.currentTarget);
     openChat(chatLi.attr("chat-id"));
     $("#chatsList > li").removeClass("bg-primary");
-    chatLi.addClass("bg-primary");
+    chatLi.addClass("block");
 });
 
 $("#foundUsers").on("click", "li", event => {
@@ -112,11 +112,11 @@ async function openChat(chat_id) {
 
 async function displayMessage(user_id, users, message) {
     let nameDiv = $("<div>");
-    if (message.user_id == user_id) {
-        nameDiv.addClass(["col-3", "bg-secondary", "text-white", "m-2"]);
+      if (message.user_id == user_id) {
+        nameDiv.addClass(["message my_msg"]);
     } else {
 
-        nameDiv.addClass(["col-3", "bg-primary", "text-white", "m-2"]);
+        nameDiv.addClass(["message friend_msg"]);
     }
 
     let user = getUser(users, message.user_id);
@@ -124,12 +124,13 @@ async function displayMessage(user_id, users, message) {
     nameDiv.html(user.Username);
 
     let textDiv = $("<div>");
-    textDiv.addClass("col");
+    textDiv.addClass("p");
     textDiv.html(message.Text);
+
     let rowDiv = $("<div>");
-    rowDiv.addClass(["row", "m-2"]);
+    rowDiv.addClass(["message"]);
     rowDiv.append(nameDiv);
-    rowDiv.append(textDiv);
+    nameDiv.append(textDiv);
 
     let msgsDiv = $("#messages");
     msgsDiv.append(rowDiv);
@@ -155,7 +156,7 @@ async function loadChat(chat) {
 
     chat.users.forEach(user => {
         if (user.id != user_id) {
-            headerHtml = headerHtml.concat(`<p>${user.Username}</p>`);
+            headerHtml = headerHtml.concat(`<p class="chrisuser">${user.Username}</p>`);
         }
     });
 
