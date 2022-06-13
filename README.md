@@ -49,7 +49,7 @@ If you require any further information / assistance, please feel free to contact
 * [Alex GitHub Profile](https://github.com/avazque008)
 * [Michael GitHub Profile]()
 * [Chris GitHub Profile](https://github.com/cmullendore)
-* [Jason GitHub Profile]()
+* [Jason GitHub Profile](https://github.com/gummygom)
 
 ## Web Application Deployemnt URL
 
