@@ -1,0 +1,3 @@
+DROP DATABASE IF EXISTS yakety_db;
+
+CREATE DATABASE yakety_db;
