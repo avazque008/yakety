@@ -26,21 +26,12 @@ $("#sendNewChat").on("click", async event => {
     let target_user_id = $("#newMessageText").attr("user_id");
     let newChat = {
         other_user_id: target_user_id,
-        name: ""
+        name: "",
+        message: message
     }
 
-    let newChatResponse = await post('/api/chats', newChat);
-    console.log(newChatResponse);
-    if (!newChatResponse) {
-        alert("Your new chat was not created successfully.");
-        return;
-    }
+    await post('/api/chats', newChat);
 
-    let newChatId = newChatResponse.id;
-
-    let messageResponse = await post(`/api/chats/${newChatId}`, { message: message });
-
-    console.log(messageResponse);
 
 })
 
@@ -78,25 +69,18 @@ async function registerSocket(stream_session_id) {
     let resp = await put(`/api/users/${user_id}`, {
         stream_session_id: stream_session_id
     });
-    console.log(resp);
     if (!resp.ok) {
         console.log("Streaming session failed to register");
     }
-
-}
-
-async function receiveMessage(msg) {
-
 }
 
 async function newChat(chat) {
+    console.log("new_chat");
     console.log(chat);
     loadChat(chat);
 }
 
 async function openChat(chat_id) {
-    const user_id = Cookies.get("user_id");
-
     let chat = await get(`/api/chats/${chat_id}`);
 
     $("#sendMessage").attr("chat-id", chat_id);
@@ -106,13 +90,14 @@ async function openChat(chat_id) {
     $("#messages").empty();
 
     chat.messages.forEach(async message => {
-        await displayMessage(user_id, users, message);
+        await displayMessage(users, message);
     });
 }
 
-async function displayMessage(user_id, users, message) {
+async function displayMessage(users, message) {
+    let user_id = Cookies.get("user_id");
     let nameDiv = $("<div>");
-      if (message.user_id == user_id) {
+    if (message.user_id == user_id) {
         nameDiv.addClass(["message my_msg"]);
     } else {
 
@@ -128,6 +113,7 @@ async function displayMessage(user_id, users, message) {
     textDiv.html(message.Text);
 
     let rowDiv = $("<div>");
+    rowDiv.id = "message-" + message.id;
     rowDiv.addClass(["message"]);
     rowDiv.append(nameDiv);
     nameDiv.append(textDiv);
@@ -135,7 +121,9 @@ async function displayMessage(user_id, users, message) {
     let msgsDiv = $("#messages");
     msgsDiv.append(rowDiv);
 
-    msgsDiv.scrollTop();
+    let scrollDiv = document.getElementById("messages");
+    scrollDiv.lastChild.scrollIntoView();
+
 
 }
 
@@ -191,12 +179,14 @@ async function post(url, data) {
         },
         body: JSON.stringify(data)
     });
-
     if (!resp.ok) {
         alert('An error occurred performing your request');
     }
-    if (resp.bodyUsed) {
-        return await resp.json()
+    if (resp.body != null) {
+        let respText = await resp.text();
+        if (respText.trim().length > 0) {
+            return JSON.parse(respText);
+        }
     }
     return null;
 }
@@ -215,8 +205,11 @@ async function put(url, data) {
     if (!resp.ok) {
         alert('An error occurred performing your request');
     }
-    if (resp.bodyUsed) {
-        return await resp.json()
+    if (resp.body != null) {
+        let respText = await resp.text();
+        if (respText.trim().length > 0) {
+            return JSON.parse(respText);
+        }
     }
     return null;
 }
@@ -238,24 +231,19 @@ loadChats();
 
 const socket = io();
 socket.on('client_id', async client_id => {
-    console.log("client_id");
-    await registerSocket(client_id);
-    console.log(client_id);
+    console.log("socket_id");
+    await registerSocket(socket.id);
+    console.log(socket.id);
 });
 
-socket.on('new_chat', async message => {
+socket.on('new_chat', async chat => {
     console.log("new_chat");
-    await registerSocket(client_id);
-    console.log(client_id);
+    loadChat(chat);
 });
 
-socket.on('receive_message', async message => {
+socket.on('receive_message', async detail => {
     console.log("receiving_message");
-    await registerSocket(client_id);
-    console.log(client_id);
+    if ($("#sendMessage").attr("chat-id") == detail.chat_id) {
+        displayMessage(detail.users, detail.message);
+    }
 });
-/*
-socket.onAny((event, ...args) => {
-    console.log(event, args);
-});
-*/
