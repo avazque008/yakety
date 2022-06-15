@@ -1,20 +1,19 @@
 const router = require('express').Router();
 const { response } = require('express');
 const { Chat, User } = require('../../models');
-const verifyChat = require('../../utils/verify-chat');
 
 // GET A Chat by ID
-router.get('/', async (req, res) => {
+router.get('/', async(req, res) => {
 
     let user = await User.GetUser(req.session.user_id);
 
     user.GetChats().then(dbChatData => {
-        if (!dbChatData) {
-            res.status(404).json({ message: 'No chat found with this id' });
-            return;
-        }
-        res.json(dbChatData);
-    })
+            if (!dbChatData) {
+                res.status(404).json({ message: 'No chat found with this id' });
+                return;
+            }
+            res.json(dbChatData);
+        })
         .catch(err => {
             console.log(err);
             res.status(500).json(err);
@@ -24,28 +23,67 @@ router.get('/', async (req, res) => {
 
 //  CREATE New Chat
 // /api/chats/
-router.post('/', verifyChat, async (req, res) => {
-    let newChat = await Chat.CreateChat([req.session.user_id, req.body.other_user_id], req.body.name)
-        .catch(err => {
-            console.log(err);
-            res.status(500).json(err);
-        });
+router.post('/', async(req, res) => {
+    const chats = await User.GetUser(req.session.user_id).then(user => user.GetChats());
+    let newChat = null;
 
-    newChat = await Chat.GetChat(newChat.id);
+    chats.forEach(chat => {
+        let chatUserIds = [];
+        chat.users.forEach(user => chatUserIds.push(user.id));
 
-    const sockets = req.app.get("socketio").engine.clients;
+        if (chatUserIds.includes(req.session.user_id) && chatUserIds.includes(+req.body.other_user_id)) {
+            newChat = chat;
+            return;
+        }
+    });
 
-    sendMessages(sockets, newChat.users, "new_chat", { anything: "lovely" });
+    if (newChat == null) {
+        newChat = await Chat.CreateChat([req.session.user_id, req.body.other_user_id], req.body.name)
+            .catch(err => {
+                console.log(err);
+                res.status(500).json(err);
+            });
 
-    res.json(newChat);
+        newChat = await Chat.GetChat(newChat.id);
+    }
+
+    const sockets = [];
+    const io = req.app.get("socketio");
+    newChat.users.forEach(user => {
+        for (var i in io.engine.clients) {
+            if (io.engine.clients[i].userID === user.id) {
+                sockets.push(io.engine.clients[i]);
+            }
+        }
+    });
+
+    sendMessages(sockets, newChat.users, "new_chat", newChat);
+
+    res.send(newChat);
 });
 
 // ADD Send Message to a Chat
-router.post('/:id', async (req, res) => {
+router.post('/:id', async(req, res) => {
     let chat = await Chat.GetChat(req.params.id);
 
     await chat.AddMessage(req.session.user_id, req.body.message)
-        .then(dbChatData => res.json(dbChatData))
+        .then(dbChatData => {
+            const io = req.app.get("socketio");
+            const sockets = io.sockets.sockets;
+            chat.users.forEach(user => {
+                sockets.forEach(socket => {
+                    if (socket.userID === user.id) {
+                        socket.emit("receive_message", {
+                            chat_id: chat.id,
+                            user_id: req.session.user_id,
+                            users: chat.users,
+                            message: dbChatData
+                        });
+                    }
+                });
+            });
+            //res.json(dbChatData)
+        })
         .catch(err => {
             console.log(err);
             res.status(500).json(err);
@@ -53,7 +91,7 @@ router.post('/:id', async (req, res) => {
 });
 
 // Get Existing Chat
-router.get('/:id', async (req, res) => {
+router.get('/:id', async(req, res) => {
     let chat = await Chat.GetChat(req.params.id);
 
     // DEFINE SKIP AND TAKE!!
@@ -66,7 +104,7 @@ router.get('/:id', async (req, res) => {
 });
 
 function sendMessages(sockets, users, message_type, message) {
-    if (users && sockets) {
+    if (users && users.length > 0 && sockets && sockets.length > 0) {
         users.forEach(user => {
             sockets.forEach(socket => {
                 if (user.id === socket.userID) {

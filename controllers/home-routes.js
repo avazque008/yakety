@@ -10,7 +10,7 @@ router.get('/', async(req, res) => {
     res.cookie('user_id', req.session.user_id);
     res.cookie('username', req.session.username);
     //res.send();
-    res.render('home-page');
+    res.render('home-page', { username: req.session.username, user_id: req.session.user_id });
 });
 
 module.exports = router;
