@@ -47,19 +47,39 @@ router.post('/', async(req, res) => {
         newChat = await Chat.GetChat(newChat.id);
     }
 
-    const sockets = [];
     const io = req.app.get("socketio");
+    const sockets = io.sockets.sockets;
     newChat.users.forEach(user => {
-        for (var i in io.engine.clients) {
-            if (io.engine.clients[i].userID === user.id) {
-                sockets.push(io.engine.clients[i]);
+        sockets.forEach(socket => {
+            if (socket.userID === user.id) {
+                socket.emit("new_chat", newChat);
             }
-        }
+        });
     });
 
-    sendMessages(sockets, newChat.users, "new_chat", newChat);
+    await newChat.AddMessage(req.session.user_id, req.body.message)
+        .then(dbChatData => {
+            const io = req.app.get("socketio");
+            const sockets = io.sockets.sockets;
+            newChat.users.forEach(user => {
+                sockets.forEach(socket => {
+                    if (socket.userID === user.id) {
+                        socket.emit("receive_message", {
+                            chat_id: newChat.id,
+                            user_id: req.session.user_id,
+                            users: newChat.users,
+                            message: dbChatData
+                        });
+                    }
+                });
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json(err);
+        });
 
-    res.send(newChat);
+
 });
 
 // ADD Send Message to a Chat

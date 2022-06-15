@@ -26,21 +26,12 @@ $("#sendNewChat").on("click", async event => {
     let target_user_id = $("#newMessageText").attr("user_id");
     let newChat = {
         other_user_id: target_user_id,
-        name: ""
+        name: "",
+        message: message
     }
 
-    let newChatResponse = await post('/api/chats', newChat);
-    console.log(newChatResponse);
-    if (!newChatResponse) {
-        alert("Your new chat was not created successfully.");
-        return;
-    }
+    await post('/api/chats', newChat);
 
-    let newChatId = newChatResponse.id;
-
-    let messageResponse = await post(`/api/chats/${newChatId}`, { message: message });
-
-    console.log(messageResponse);
 
 })
 
@@ -83,10 +74,6 @@ async function registerSocket(stream_session_id) {
     }
 }
 
-async function receiveMessage(msg) {
-
-}
-
 async function newChat(chat) {
     console.log("new_chat");
     console.log(chat);
@@ -126,6 +113,7 @@ async function displayMessage(users, message) {
     textDiv.html(message.Text);
 
     let rowDiv = $("<div>");
+    rowDiv.id = "message-" + message.id;
     rowDiv.addClass(["message"]);
     rowDiv.append(nameDiv);
     nameDiv.append(textDiv);
@@ -133,7 +121,9 @@ async function displayMessage(users, message) {
     let msgsDiv = $("#messages");
     msgsDiv.append(rowDiv);
 
-    msgsDiv.scrollTop();
+    let scrollDiv = document.getElementById("messages");
+    scrollDiv.lastChild.scrollIntoView();
+
 
 }
 
@@ -246,9 +236,9 @@ socket.on('client_id', async client_id => {
     console.log(socket.id);
 });
 
-socket.on('new_chat', async message => {
+socket.on('new_chat', async chat => {
     console.log("new_chat");
-    console.log(message);
+    loadChat(chat);
 });
 
 socket.on('receive_message', async detail => {
