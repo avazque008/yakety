@@ -46,7 +46,7 @@ If you require any further information / assistance, please feel free to contact
 ### Contact Information
 
 * [Alex GitHub Profile](https://github.com/avazque008)
-* [Michael GitHub Profile]()
+* [Michael GitHub Profile](https://github.com/michaelmikelic)
 * [Chris GitHub Profile](https://github.com/cmullendore)
 * [Jason GitHub Profile](https://github.com/gummygom)
 
