@@ -45,17 +45,18 @@ router.post('/', async(req, res) => {
             });
 
         newChat = await Chat.GetChat(newChat.id);
+
+        const io = req.app.get("socketio");
+        const sockets = io.sockets.sockets;
+        newChat.users.forEach(user => {
+            sockets.forEach(socket => {
+                if (socket.userID === user.id) {
+                    socket.emit("new_chat", newChat);
+                }
+            });
+        });
     }
 
-    const io = req.app.get("socketio");
-    const sockets = io.sockets.sockets;
-    newChat.users.forEach(user => {
-        sockets.forEach(socket => {
-            if (socket.userID === user.id) {
-                socket.emit("new_chat", newChat);
-            }
-        });
-    });
 
     await newChat.AddMessage(req.session.user_id, req.body.message)
         .then(dbChatData => {
