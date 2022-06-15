@@ -1,11 +1,25 @@
 <!-- Modal -->
-<head>
-  <link rel="stylesheet" href="/stylesheets/chat.css">
-</head>
+<div class="modal" id="newMessageModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="newChatModalTitle">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <textarea class="form-control" id="newMessageText" rows="3" placeholder="What would you like to say?"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="sendNewChat">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
 <div class="container">
   <div class="leftSide">
     <div class="header">
-      <h2>Yakety</h2>
+      <h2 id="userWelcome" data-userid="{{user_id}}">Welcome {{username}}</h2>
     </div>
     <div class="searchChat">
       <input id="findUser" class="form-control" placeholder="Find a user" autocomplete="off">

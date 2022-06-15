@@ -70,9 +70,9 @@ router.put('/:id', (req, res) => {
     }
 
     if (req.body.stream_session_id) {
-        var socket = req.app.get("socketio").engine.clients[req.body.stream_session_id];
+        var io = req.app.get("socketio")
+        var socket = io.sockets.sockets.get(req.body.stream_session_id);
         socket.userID = req.session.user_id;
-        console.log(req.app.get("socketio").engine.clients);
     }
 
 });

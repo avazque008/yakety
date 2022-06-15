@@ -38,6 +38,8 @@ class Chat extends Model {
 
         this.LastUsedOn = newMessage.SentOn;
         this.save();
+
+        return newMessage;
     }
 
     async GetMessages(skip, take) {

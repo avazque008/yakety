@@ -337,3 +337,8 @@ body {
     background-color: #acedff;
 }
 
+.modal-footer {
+  justify-content: space-around;
+}
+
+
