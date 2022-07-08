@@ -44,8 +44,6 @@ async function signupFormHandler(event) {
         });
 
         if (response.ok) {
-            //Testing
-            alert('You have signed up successfully!')
             document.location.replace('/home');
         } else {
             alert(response.statusText);

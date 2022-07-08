@@ -57,7 +57,11 @@ $("#sendMessage").on("click", async event => {
     let chat_id = $(event.currentTarget).attr("chat-id");
     let message = $("#messageContent").val();
 
-    await post(`/api/chats/${chat_id}`, { message: message });
+    if (chat_id && message) {
+        await post(`/api/chats/${chat_id}`, { message: message });
+    } else {
+        alert('Please find a user to send a message to!');
+    } 
 })
 
 
